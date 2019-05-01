@@ -25,7 +25,7 @@
 	#include "scale_server.h"
 #endif // BOARD == WEB_TERMINAL2
 
-#define HTML_PROGMEM          //Использовать веб страницы из flash памяти
+//#define HTML_PROGMEM          //Использовать веб страницы из flash памяти
 
 #ifdef HTML_PROGMEM
 	#include "Pages.h"

@@ -34,6 +34,7 @@
         <string>sketches\BrowserServer.h</string>
         <string>sketches\HttpUpdater.h</string>
         <string>sketches\Task.h</string>
+        <string>sketches\SoftSettingsPage.h</string>
       </OtherFiles>
     </ProjectModeSettings>
   </Project>

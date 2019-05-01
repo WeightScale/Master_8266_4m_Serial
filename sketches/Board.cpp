@@ -1,6 +1,7 @@
 #include "Board.h"
 #include "CalibratePage.h"
 #include "SettingsPage.h"
+#include "SoftSettingsPage.h"
 #include "Battery.h"
 #include "SlaveScales.h"
 #include "BrowserServer.h"
@@ -23,6 +24,7 @@ BoardClass::BoardClass() {
 	//_wifi->loadPoints();
 	CalibratePage = new CalibratePageClass(&_eeprom.scales_value);
 	SettingsPage = new SettingsPageClass(&_eeprom.settings);
+	SoftSettingsPage = new SoftSettingsPageClass(&_eeprom.settings);
 #ifdef DEBUG_CLIENT
 	_wifi->connect(); 
 #endif // DEBUG_CLIENT
@@ -124,14 +126,14 @@ url:
 
 void BoardClass::parceCmd(JsonObject& cmd) {
 	const char *command = cmd["cmd"];
-	String strCmd = {};
+	String strCmd = "";
 	if (strcmp(command, "tp") == 0) {
 #if !defined(DEBUG_WEIGHT_RANDOM)  && !defined(DEBUG_WEIGHT_MILLIS)
 		Board->scales()->tare();
 		SlaveScales.doTape();
 #endif	
 	}else if (strcmp(command, "sta") == 0) {
-		bool status = cmd["con"].as<bool>();
+		bool status = cmd["con"];
 		if (status)
 			onSTA();
 		else
@@ -140,7 +142,11 @@ void BoardClass::parceCmd(JsonObject& cmd) {
 	}else if (strcmp(command, "wt") == 0) {
 		cmd.remove("cmd");
 		weightHttpCmd(cmd);
-	}else {
+	}else if (strcmp(command, "gnet") == 0) {
+		cmd.printTo(strCmd);
+		webSocket.textAll(strCmd);
+		return;
+	}else{
 		return;
 	}
 	cmd.printTo(strCmd);

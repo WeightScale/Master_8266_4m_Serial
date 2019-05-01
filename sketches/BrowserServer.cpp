@@ -6,6 +6,7 @@
 #include <AsyncJson.h>
 #include "SettingsPage.h"
 #include "CalibratePage.h"
+#include "SoftSettingsPage.h"
 
 //using namespace std::placeholders;
 
@@ -43,6 +44,7 @@ void BrowserServerClass::begin() {
 	addHandler(new HttpUpdaterClass("sa", "654321"));
 	addHandler(SettingsPage);
 	addHandler(CalibratePage);
+	addHandler(SoftSettingsPage);
 	init();
 	dnsServer.start(DNS_PORT, WiFi.hostname(), apIP);
 	AsyncWebServer::begin(); // Web server start
@@ -261,7 +263,12 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 			return;
 		}else if (strcmp(command, "binfo") == 0) {
 			Board->battery()->doInfo(json);
-		}else {
+		}else if (strcmp(command, "gnet") == 0) {
+			String str = "";
+			json.printTo(str);
+			Serial.println(str);
+			return;
+		}else{
 			return;
 		}
 		size_t lengh = json.measureLength();
