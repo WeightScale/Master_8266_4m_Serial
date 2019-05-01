@@ -139,12 +139,12 @@
       </DebugSettingsOverride>
       <BuildSettingsExtension xsi:type="com.visualgdb.build.external.arduino.extension">
         <BoardID>esp8266:esp8266:generic</BoardID>
-        <COMPort>COM5</COMPort>
+        <COMPort>COM6</COMPort>
         <Properties>
           <Entries>
             <KeyValue>
               <Key>CpuFrequency</Key>
-              <Value>80</Value>
+              <Value>160</Value>
             </KeyValue>
             <KeyValue>
               <Key>VTable</Key>
@@ -196,7 +196,7 @@
             </KeyValue>
           </Entries>
         </Properties>
-        <DebugUnoptimizedComponentTypes>Sketch</DebugUnoptimizedComponentTypes>
+        <DebugUnoptimizedComponentTypes>None</DebugUnoptimizedComponentTypes>
       </BuildSettingsExtension>
     </VisualGDBConfiguration>
   </Configurations>

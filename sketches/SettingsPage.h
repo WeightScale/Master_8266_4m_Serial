@@ -12,6 +12,8 @@ public:
 	virtual bool canHandle(AsyncWebServerRequest *request) override final;
 	virtual void handleRequest(AsyncWebServerRequest *request) override final;
 	virtual bool isRequestHandlerTrivial() override final {return false;};	
+	void handleValue(AsyncWebServerRequest * request);
+	void handleProp(AsyncWebServerRequest*);
 };
 
 extern SettingsPageClass * SettingsPage;

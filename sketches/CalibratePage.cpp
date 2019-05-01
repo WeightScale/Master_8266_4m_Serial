@@ -1,12 +1,15 @@
 #include "CalibratePage.h"
 #include "Board.h"
+#include "BrowserServer.h"
 
-CalibratePageClass::CalibratePageClass(t_scales_value * value) {};
+//CalibratePageClass * CalibratePage;
+
+CalibratePageClass::CalibratePageClass(t_scales_value * value)	: _value(value) {};
 
 bool CalibratePageClass::canHandle(AsyncWebServerRequest *request) {	
 	if (request->url().equalsIgnoreCase(F("/calibr.html"))) {
 		if (!request->authenticate(_value->user, _value->password)) {
-			if (!request->authenticate(MASTER_PASS, MASTER_PASS)) {
+			if (!server->checkAdminAuth(request)) {
 				request->requestAuthentication();
 				return false;
 			}
@@ -32,6 +35,7 @@ void CalibratePageClass::handleRequest(AsyncWebServerRequest *request) {
 			digitalWrite(RATE, _value->rate);
 			Board->scales()->mathRound();
 			if (saveValue()) {
+				SlaveScales.doValueUpdate(request);
 				goto ok;
 			}
 			goto err;
@@ -69,6 +73,36 @@ url:
 #else
 	request->send(SPIFFS, request->url());
 #endif
+}
+
+void CalibratePageClass::handleValue(AsyncWebServerRequest * request) {
+	if (!request->authenticate(_value->user, _value->password)){
+		if (!server->checkAdminAuth(request))	{
+			return request->requestAuthentication();
+		}
+	}
+		
+	AsyncResponseStream *response = request->beginResponseStream(F("application/json"));
+	DynamicJsonBuffer jsonBuffer;
+	JsonObject &json = jsonBuffer.createObject();
+	doCalibrateValue(json);	
+	json.printTo(*response);
+	request->send(response);
+}
+
+size_t CalibratePageClass::doCalibrateValue(JsonObject& root) {
+	root[RATE_JSON] = _value->rate;
+	root[STEP_JSON] = _value->step;
+	root[AVERAGE_JSON] = _value->average;
+	root[WEIGHT_MAX_JSON] = _value->max;
+	root[OFFSET_JSON] = _value->offset;
+	root[ACCURACY_JSON] = _value->accuracy;
+	root[SCALE_JSON] = _value->scale;
+	root[FILTER_JSON] = _value->filter;
+	root[SEAL_JSON] = _value->seal;
+	root[USER_JSON] = _value->user;
+	root[PASS_JSON] = _value->password;
+	return root.measureLength();
 }
 
 bool CalibratePageClass::saveValue() {

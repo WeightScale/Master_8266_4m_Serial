@@ -2,7 +2,7 @@
 #include "Task.h"
 #include <ESP8266WiFi.h>
 
-#define DEBUG_CLIENT
+//#define DEBUG_CLIENT
 
 class WiFiModuleClass : /*public ESP8266WiFiClass,*/ public Task {
 private:

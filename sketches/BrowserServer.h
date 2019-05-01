@@ -18,8 +18,8 @@ typedef struct {
 class BrowserServerClass : public AsyncWebServer{
 	protected:
 		strHTTPAuth_t _httpAuth;		
-		char * _username;
-		char * _password;
+		//char * _username;
+		//char * _password;
 	public:
 	
 	BrowserServerClass(uint16_t port, char * username, char * password);
@@ -29,7 +29,7 @@ class BrowserServerClass : public AsyncWebServer{
 		void send_wwwauth_configuration_html(AsyncWebServerRequest *request);
 		String getContentType(String filename);
 		bool checkAdminAuth(AsyncWebServerRequest * request);
-		bool isAuthentified(AsyncWebServerRequest * request);
+		//bool isAuthentified(AsyncWebServerRequest * request);
 		String getName(){ return _httpAuth.wwwUsername;};
 		String getPass(){ return _httpAuth.wwwPassword;};
 		void stop(){_server.end();};
@@ -75,9 +75,9 @@ extern AsyncWebSocket webSocket;
 	void handleScalesPng(AsyncWebServerRequest*);
 #endif
 //size_t commandWeight(JsonObject& json);
-void handleSettings(AsyncWebServerRequest * request);
+
 //void handleAccessPoint(AsyncWebServerRequest*);
-void handleScaleProp(AsyncWebServerRequest*);
 void handleRSSI(AsyncWebServerRequest*);
+void reconnectWifi(AsyncWebServerRequest * request);
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
 void onSsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);

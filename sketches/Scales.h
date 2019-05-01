@@ -6,7 +6,7 @@
 #include <ArduinoJson.h>
 
 //#define DEBUG_WEIGHT_RANDOM
-#define DEBUG_WEIGHT_MILLIS
+//#define DEBUG_WEIGHT_MILLIS
 
 #define DOUT_PIN		GPIO16
 #define SCK_PIN			GPIO14
@@ -16,7 +16,7 @@ typedef struct {
 	bool isSave;
 	int stabNum;
 	float value;
-	long int time;
+	unsigned long time;
 }t_save_value;
 
 class ScalesClass : public HX711, public Task {
@@ -26,7 +26,7 @@ private:
 	float _round; /* множитиль для округления */
 	float _stable_step; /* шаг для стабилизации */
 	bool _stableWeight = true;
-	t_save_value _saveWeight;
+	t_save_value _saveWeight = {0};
 	float _weightSlave;
 public:
 	ScalesClass(byte, byte, t_scales_value * value);
@@ -46,6 +46,7 @@ public:
 	unsigned char average(){return _value->average;};
 	float weight(){return _weight;};
 	bool overload() {return _weight > _value->max;};
+	unsigned int seal(){ return _value->seal;};
 	void mathRound() {
 		_round = pow(10.0, _value->accuracy) / _value->step;  // множитель для округления}
 		_stable_step = 1 / _round;
@@ -55,6 +56,6 @@ public:
 		offset(Current());
 	}
 	void detectStable(float);
-	size_t doData(JsonObject& json);
+	size_t doData(JsonObject& json);	
 	void formatValue(float value, char* string);
 };

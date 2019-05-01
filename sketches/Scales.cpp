@@ -39,7 +39,7 @@ void ScalesClass::takeWeight() {
 	size_t lengh = Board->weightCmd(json);	
 	//AsyncWebSocketMessageBuffer * buffer = webSocket.makeBuffer(lengh);
 	//if (buffer) {
-		String str = String();
+	String str = String();
 	//json.printTo((char *)buffer->get(), lengh + 1);
 	json.printTo(str);
 	webSocket.textAll(str);
@@ -47,7 +47,7 @@ void ScalesClass::takeWeight() {
 		//webSocket.textAll(buffer);
 	//}
 	if (_saveWeight.isSave) {
-		//CORE->saveEvent("weight", _saveWeight.value);
+		Board->saveEvent("weight", _saveWeight.value);
 		_saveWeight.isSave = false;
 	}
 	updateCache();
@@ -98,7 +98,7 @@ float ScalesClass::getWeight() {
 	return round(getUnits() * _round) / _round; 
 }
 
-void ScalesClass::detectStable(float w) {	
+void /*ICACHE_RAM_ATTR*/ ScalesClass::detectStable(float w) {	
 	if (_saveWeight.value != w) {
 		_saveWeight.stabNum = STABLE_NUM_MAX;
 		_stableWeight = false;

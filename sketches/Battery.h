@@ -4,7 +4,7 @@
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 
-#define DEBUG_BATTERY		/*Для теста*/
+//#define DEBUG_BATTERY		/*Для теста*/
 
 #define CONVERT_V_TO_ADC(v)		(((v * (R2_KOM /(R1_KOM + R2_KOM)))*ADC)/VREF)
 #define MAX_CHG					CONVERT_V_TO_ADC(V_BAT_MAX)		/**/

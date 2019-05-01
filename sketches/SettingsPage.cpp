@@ -1,5 +1,6 @@
 #include "SettingsPage.h"
 #include "Board.h"
+#include "BrowserServer.h"
 
 SettingsPageClass * SettingsPage;
 
@@ -16,7 +17,7 @@ bool SettingsPageClass::canHandle(AsyncWebServerRequest *request) {
 		return false;
 auth:
 	if (!request->authenticate(_value->user, _value->password)) {
-		if (!request->authenticate(MASTER_USER, MASTER_PASS)) {
+		if (!server->checkAdminAuth(request)) {
 			request->requestAuthentication();
 			return false;
 		}
@@ -29,13 +30,14 @@ void SettingsPageClass::handleRequest(AsyncWebServerRequest *request) {
 		String message = " ";
 		if (request->hasArg("assid")) {	
 			request->arg("assid").toCharArray(_value->apSSID, request->arg("assid").length() + 1);
-			request->arg("n_admin").toCharArray(_value->user, request->arg("n_admin").length() + 1);
-			request->arg("p_admin").toCharArray(_value->password, request->arg("p_admin").length() + 1);
-			if (Board->memory()->save()) {
+			request->arg("nadmin").toCharArray(_value->user, request->arg("nadmin").length() + 1);
+			request->arg("padmin").toCharArray(_value->password, request->arg("padmin").length() + 1);
+			if (Board->memory()->save())
 				goto url;
-			}
+			else
+				return request->send(400);
 		}		
-		return request->send(400);
+		return request->send(204);
 	}
 url:
 #ifdef HTML_PROGMEM
@@ -46,4 +48,41 @@ url:
 	else
 		request->send(SPIFFS, request->url());
 #endif
+}
+
+void SettingsPageClass::handleValue(AsyncWebServerRequest * request) {
+	if (!request->authenticate(_value->user, _value->password)) {
+		if (!server->checkAdminAuth(request)) {
+			return request->requestAuthentication();
+		}
+	}
+	
+	AsyncResponseStream *response = request->beginResponseStream(F("application/json"));
+	DynamicJsonBuffer jsonBuffer;
+	JsonObject &root = jsonBuffer.createObject();
+	Board->doSettings(root);	
+	root.printTo(*response);
+	request->send(response);
+}
+
+void SettingsPageClass::handleProp(AsyncWebServerRequest * request) {
+	if (!request->authenticate(_value->user, _value->password)) {
+		if (!server->checkAdminAuth(request)) {
+			return request->requestAuthentication();
+		}
+	}
+	AsyncResponseStream *response = request->beginResponseStream(F("application/json"));
+	DynamicJsonBuffer jsonBuffer;
+	JsonObject &root = jsonBuffer.createObject();
+	root["id_local_host"] = WiFi.hostname();
+	//root["id_ap_ssid"] = String(CORE->getApSSID());
+	root["id_ap_ip"] = toStringIp(WiFi.softAPIP());
+	root["id_slv_ip"] = SlaveScales.url();
+	//root["id_ip"] = toStringIp(WiFi.localIP());
+	root["sl_id"] = String(Board->scales()->seal());
+	root["chip_v"] = String(ESP.getCpuFreqMHz());
+	root["id_mac"] = WiFi.macAddress();
+	root["id_vr"] = SKETCH_VERSION;
+	root.printTo(*response);
+	request->send(response);
 }
