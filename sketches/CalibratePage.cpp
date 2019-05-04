@@ -28,6 +28,14 @@ void CalibratePageClass::handleRequest(AsyncWebServerRequest *request) {
 			Board->scales()->SetFilterWeight(request->arg(F("weightFilter")).toInt());
 			_value->filter = Board->scales()->GetFilterWeight();
 			_value->max = request->arg(F("weightMax")).toFloat();
+			_value->zero_man_range = request->arg(F("zm_range")).toFloat();
+			_value->zero_on_range = request->arg(F("zo_range")).toFloat();
+			_value->zero_auto = request->arg(F("zd_auto")).toInt();
+			//_weight_zero_range = _scales_value->max * _scales_value->zero_range; /* Диапазон нуля */
+			if(request->hasArg("z_en_auto"))
+				_value->enable_zero_auto = true;
+			else
+				_value->enable_zero_auto = false;			
 			if (request->hasArg("rate"))
 				_value->rate = true;
 			else
@@ -42,7 +50,10 @@ void CalibratePageClass::handleRequest(AsyncWebServerRequest *request) {
 		}
 		
 		if (request->hasArg("zero")) {
-			Board->scales()->tare();
+			//Board->scales()->tare();
+			Board->scales()->SetCurrent(Board->scales()->read());
+			_value->offset = Board->scales()->Current();
+			Board->scales()->offset(_value->offset);
 		}
 		
 		if (request->hasArg(F("weightCal"))) {
@@ -95,6 +106,10 @@ size_t CalibratePageClass::doCalibrateValue(JsonObject& root) {
 	root[STEP_JSON] = _value->step;
 	root[AVERAGE_JSON] = _value->average;
 	root[WEIGHT_MAX_JSON] = _value->max;
+	root["zm_id"] = _value->zero_man_range;
+	root["zo_id"] = _value->zero_on_range;
+	root["auto_en_id"] = _value->enable_zero_auto;
+	root["zd_id"] = _value->zero_auto;
 	root[OFFSET_JSON] = _value->offset;
 	root[ACCURACY_JSON] = _value->accuracy;
 	root[SCALE_JSON] = _value->scale;

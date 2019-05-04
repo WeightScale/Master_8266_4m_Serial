@@ -160,6 +160,7 @@
             this.wT = function() {
                 clearTimeout(tw);
                 tw = setTimeout(function() {
+                    w.close();
                     w.create();
                 }, 7000);
             };
@@ -218,7 +219,7 @@
             }
         }
         window.onload = function() {
-            w = new SS('ws://' + d.location.host + '/ws', ['arduino'], parseCommand, function() {
+            w = new SS('ws://' + d.location.host + '/ws', ['scales'], parseCommand, function() {
                 w.wT();
             });
             w.oS();
@@ -277,8 +278,10 @@
                 <td>iP точки:</td> <td align='right' id='id_ap_ip'/>
               </tr>
               <tr>
-                <td>iP SLAVE:</td>
-                <td align='right' id='id_slv_ip'/>
+                <td>iP SLAVE:</td><td align='right' id='id_slv_ip'/>
+              </tr>
+              <tr>
+                <td>iP SOFT:</td><td align='right' id='id_ip'/>
               </tr>
               <tr> <td>mac:</td>
                 <td align='right' id='id_mac'/>
@@ -302,7 +305,7 @@
                     <a href='/calibr.html'><img src='favicon.png' alt="калибровка" class='btn btn--s btn--blue'></a>
                 </td>
                 <td>
-                    <a href='/rssi.html'><img src='wifi.png' alt="сигнал" class='btn btn--s btn--blue'></a>
+                    <a href='/soft.html'><img src='wifi.png' alt="софт" class='btn btn--s btn--blue'></a>
                 </td>
                 <td>
                     <a href='/binfo.html'><img src='btr.png' alt="бат" class='btn btn--s btn--blue'></a>

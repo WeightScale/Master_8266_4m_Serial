@@ -1,4 +1,4 @@
-#include "Board.h"
+ï»¿#include "Board.h"
 #include "CalibratePage.h"
 #include "SettingsPage.h"
 #include "SoftSettingsPage.h"
@@ -79,6 +79,8 @@ bool BoardClass::doDefault() {
 	_eeprom.scales_value.step = 1;
 	_eeprom.scales_value.zero_man_range = 0.02;
 	_eeprom.scales_value.zero_on_range = 0.02;
+	_eeprom.scales_value.zero_auto = 4;
+	_eeprom.scales_value.enable_zero_auto = false;
 	return _memory->save();
 };
 
@@ -129,12 +131,13 @@ void BoardClass::parceCmd(JsonObject& cmd) {
 	String strCmd = "";
 	if (strcmp(command, "tp") == 0) {
 #if !defined(DEBUG_WEIGHT_RANDOM)  && !defined(DEBUG_WEIGHT_MILLIS)
-		Board->scales()->tare();
-		SlaveScales.doTape();
+		if(Board->scales()->zero(_eeprom.scales_value.zero_man_range))
+			SlaveScales.doTape();
 #endif	
 	}else if (strcmp(command, "sta") == 0) {
-		bool status = cmd["con"];
-		if (status)
+		_softConnect = cmd["con"];
+		_softIp = cmd["ip"].as<String>();
+		if (_softConnect)
 			onSTA();
 		else
 			offSTA();
@@ -143,6 +146,10 @@ void BoardClass::parceCmd(JsonObject& cmd) {
 		cmd.remove("cmd");
 		weightHttpCmd(cmd);
 	}else if (strcmp(command, "gnet") == 0) {
+		cmd.printTo(strCmd);
+		webSocket.textAll(strCmd);
+		return;
+	}else if (strcmp(command, "snet") == 0) {
 		cmd.printTo(strCmd);
 		webSocket.textAll(strCmd);
 		return;
@@ -160,7 +167,7 @@ void BoardClass::handleSeal(AsyncWebServerRequest * request) {
 	if (_memory->save()) {
 		return request->send(200, F("text/html"), String(_eeprom.scales_value.seal));
 	}
-	return request->send(400, F("text/html"), F("Îøèáêà!"));
+	return request->send(400, F("text/html"), F("ÐžÑˆÐ¸Ð±ÐºÐ°!"));
 }
 
 bool BoardClass::saveEvent(const String& event, float value) {
@@ -174,9 +181,9 @@ bool BoardClass::saveEvent(const String& event, float value) {
 	root["a"] = _scales->accuracy();
 	
 	root.printTo(str);
-	webSocket.textAll(str);
 	Serial.println(str);
-	Serial.flush();		
+	webSocket.textAll(str);
+	//Serial.flush();		
 	return true;	
 }
 

@@ -74,11 +74,11 @@ void SettingsPageClass::handleProp(AsyncWebServerRequest * request) {
 	AsyncResponseStream *response = request->beginResponseStream(F("application/json"));
 	DynamicJsonBuffer jsonBuffer;
 	JsonObject &root = jsonBuffer.createObject();
-	root["id_local_host"] = WiFi.hostname();
+	root["id_local_host"] = Board->wifi()->hostName();
 	//root["id_ap_ssid"] = String(CORE->getApSSID());
 	root["id_ap_ip"] = toStringIp(WiFi.softAPIP());
 	root["id_slv_ip"] = SlaveScales.url();
-	//root["id_ip"] = toStringIp(WiFi.localIP());
+	root["id_ip"] = Board->softIp();
 	root["sl_id"] = String(Board->scales()->seal());
 	root["chip_v"] = String(ESP.getCpuFreqMHz());
 	root["id_mac"] = WiFi.macAddress();

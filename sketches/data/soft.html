@@ -73,68 +73,7 @@
             }
             return false;
         }
-
-        function GetValue() {
-            var r = new XMLHttpRequest();
-            r.overrideMimeType('application/json');
-            r.onreadystatechange = function() {
-                if (r.readyState === 4) {
-                    if (r.status === 200) {
-                        var j = JSON.parse(r.responseText);
-                        for (e in j) {
-                            try {
-                                d.getElementById(e).innerHTML = j[e];
-                            } catch (e) {}
-                        }
-                    }
-                }
-            };
-            r.open('GET', '/sv', true);
-            r.send(null);
-        }
-
-        function GetSettings() {
-            var r = new XMLHttpRequest();
-            r.overrideMimeType('application/json');
-            r.onreadystatechange = function() {
-                if (r.readyState === 4) {
-                    if (r.status === 200) {
-                        try {
-                            var j = JSON.parse(r.responseText);
-                            var s = j.scale;
-                            for (e in s) {
-                                try {
-                                    if (d.getElementById(e).type === 'checkbox') {
-                                        d.getElementById(e).checked = s[e];
-                                    } else d.getElementById(e).value = s[e];
-                                } catch (e) {}
-                            }
-                            var sr = j.server;
-                            for (en in sr) {
-                                try {
-                                    d.getElementById(en).value = sr[en];
-                                } catch (e) {}
-                            }
-                            enableAuthFields(document.getElementById('id_dnip'));
-                        } catch (e) {
-                            alert("ОШИБКА " + e.toString());
-                        }
-                    } else {
-                        alert("ДАННЫЕ НАСТРОЕК НЕ НАЙДЕНЫ!!!");
-                    }
-                    GetValue();
-                }
-            };
-            r.open('GET', '/settings.json', true);
-            r.send(null);
-        }
-
-        function openSDB() {
-            var url = 'https://' + d.getElementById('id_host').value + '/scale.php?code=' + d.getElementById('id_pin').value;
-            var win = window.open(url, '_blank');
-            win.focus();
-        }
-
+        
         function enableAuthFields(check) {
             if (check.checked) {
                 d.getElementById('id_table_net').style.display = 'none';
@@ -146,15 +85,6 @@
         function formNet(i) {
             var f = new FormData(d.getElementById(i));
             var r = new XMLHttpRequest();
-            r.onreadystatechange = function() {
-                if (r.readyState === 4) {
-                    if (r.status === 200) {
-                        var rec = confirm('Перегрузить');
-                    } else if (r.status === 400) {
-                        alert('Настройки не изменились');
-                    }
-                }
-            };
             r.open('POST', '/soft.html', true);
             r.send(f);
         }
@@ -228,6 +158,12 @@
                             }
                         enableAuthFields(document.getElementById('id_dnip'));    
                         break;
+                    case 'snet':
+                      if(e.code == 200)
+                          alert("Конфигурация сохранена");
+                      else
+                          alert("Конфигурация не изменилась");
+                        break;
                     case 'cls':
                         if(e.code === 1111){
                             alert("Лимит клиентов",function (){
@@ -245,17 +181,14 @@
                 w.wT();
             });
             w.oS();
-            //GetSettings();
         };
     </script>
 </head>
 
 <body style='visibility: hidden'>
-    <a href='/'><img src='und.png' alt="&lt;" class='btn btn--s btn--blue'></a>&nbsp;&nbsp;<strong>НАСТРОЙКИ</strong>
+    <a href='/settings.html'><img src='und.png' alt="&lt;" class='btn btn--s btn--blue'></a>&nbsp;&nbsp;<strong>КОНФИГУРАЦИЯ СОФТ</strong>
     <hr>
-    <fieldset>
-        <details>
-            <summary>КОНФИГУРАЦИЯ СЕТИ</summary>
+           <fieldset> 
             <h3>
             <form id='form_id' action='javascript:formNet("form_id")'>
                 <br>
@@ -308,36 +241,7 @@
                 </table>
                 <input type='submit' value='СОХРАНИТЬ' /> </form>
                 </h3>
-        </details>
-    </fieldset>
-    <br/>
-    <fieldset style='width: auto'>
-        <details>
-            <summary>ОБЩИИ НАСТРОЙКИ</summary>
-            <br>
-            <h3>
-            <form id='form_assid_id' action='javascript:formNet("form_assid_id")'> </form>
-            <hr>
-            <form method='POST'>
-                <h5>Настройки база данных интернет</h5>
-                <table>
-                    <tr>
-                        <td><a class='btxt' href='javascript:openSDB();'>СЕРВЕР:</a></td>
-                        <td>
-                            <input id='id_server' name='server' placeholder='сервер'> </td>
-                    </tr>
-                    <tr>
-                        <td>ПИН:</td>
-                        <td>
-                            <input id='id_pin' name='pin' placeholder='пин весов'> </td>
-                    </tr>
-                </table>
-                <br>
-                <input type='submit' value='СОХРАНИТЬ' /></form>
-            </h3>
-            <hr>
-        </details>
-    </fieldset>
+                </fieldset>
     <hr>
     <footer>2018 © Powered by www.scale.in.ua</footer>
 </body>

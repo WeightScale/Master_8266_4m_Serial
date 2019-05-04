@@ -13,6 +13,7 @@ public:
 	wl_status_t connect();			  
 #endif // DEBUG_CLIENT
 	String readSerial(uint32_t timeou = 5);
+	String hostName() {return _hostName;};
 };
 
 extern IPAddress apIP;

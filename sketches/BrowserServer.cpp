@@ -46,7 +46,7 @@ void BrowserServerClass::begin() {
 	addHandler(CalibratePage);
 	addHandler(SoftSettingsPage);
 	init();
-	dnsServer.start(DNS_PORT, WiFi.hostname(), apIP);
+	dnsServer.start(DNS_PORT,Board->wifi()->hostName(), apIP);
 	AsyncWebServer::begin(); // Web server start
 }
 
@@ -255,7 +255,7 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 			Board->weightHttpCmd(json);
 		}else if (strcmp(command, "tp") == 0){
 			#if !defined(DEBUG_WEIGHT_RANDOM)  && !defined(DEBUG_WEIGHT_MILLIS)
-				Board->scales()->tare();
+			if(Board->scales()->zero(Board->memory()->_value->scales_value.zero_man_range))
 				SlaveScales.doTape();
 			#endif 
 		}else if (strcmp(command, "scan") == 0) {

@@ -82,6 +82,7 @@ private:
 	ScalesClass *_scales;
 	BatteryClass *_battery;
 	bool _softConnect = true;				/* Флаг соединения softAP */
+	String _softIp = "";
 	//BrowserServerClass *_server;
 public :
 	BoardClass();
@@ -119,8 +120,8 @@ public :
 	ScalesClass *scales() {return _scales;};
 	BatteryClass *battery() {return _battery;};
 	bool doDefault();
-	void onSTA() {_softConnect = true; _blink->onRun(std::bind(&BlinkClass::blinkSTA, _blink)); };
-	void offSTA() {_softConnect = false; _blink->onRun(std::bind(&BlinkClass::blinkAP, _blink)); };
+	void onSTA() { _softConnect = true; _blink->onRun(std::bind(&BlinkClass::blinkSTA, _blink)); };
+	void offSTA() { _softConnect = false; _blink->onRun(std::bind(&BlinkClass::blinkAP, _blink)); };
 	//void onStationModeConnected(const WiFiEventStationModeConnected& evt);
 	//void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt);	
 	void parceCmd(JsonObject& cmd);
@@ -130,6 +131,7 @@ public :
 	void handleBinfo(AsyncWebServerRequest *request);
 	void handleSeal(AsyncWebServerRequest * request);
 	bool saveEvent(const String& event, float value);
+	String softIp() {return _softIp;};
 };
 
 String toStringIp(IPAddress ip);
