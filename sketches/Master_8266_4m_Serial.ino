@@ -1,4 +1,3 @@
-#include <GDBStub.h>
 #include "Board.h"
 #include "BrowserServer.h"
 
@@ -6,6 +5,7 @@
 //#define ESP8266_USE_GDB_STUB
 
 #ifdef ESP8266_USE_GDB_STUB
+#include <GDBStub.h>
 extern "C" int gdbstub_init();
 extern "C" int gdbstub_do_break();
 #endif
