@@ -32,6 +32,15 @@ void loop(){
 	Board->wifi()->connect(); 
 #endif // DEBUG_CLIENT
 	Board->handle();
-	//Serial.println(ESP.getFreeHeap());
-	//delay(1000);
+	if (Serial.available()) {
+		String str = Board->wifi()->readSerial();
+		DynamicJsonBuffer jsonBuffer(str.length());
+		JsonObject &root = jsonBuffer.parseObject(str);
+		if (!root.success() || !root.containsKey("cmd")) {
+			Serial.flush();
+			return;
+		}				
+		Board->parceCmd(root);
+	}	
+	delay(0);
 }

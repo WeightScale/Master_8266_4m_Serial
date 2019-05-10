@@ -83,6 +83,7 @@ private:
 	BatteryClass *_battery;
 	bool _softConnect = true;				/* Флаг соединения softAP */
 	String _softIp = "";
+	String _softSSID = "";
 	//BrowserServerClass *_server;
 public :
 	BoardClass();
@@ -102,18 +103,7 @@ public :
 	};
 	void handle() {
 		run();
-		//_wifi->connect();			
-		if (Serial.available()) {
-			String str = _wifi->readSerial();
-			DynamicJsonBuffer jsonBuffer(str.length());
-			JsonObject &root = jsonBuffer.parseObject(str);
-			if (!root.success() || !root.containsKey("cmd")) {
-				Serial.flush();
-				return;
-			}				
-			parceCmd(root);
-		}	
-		delay(0);
+		//_wifi->connect();	
 	};
 	MemoryClass<MyEEPROMStruct> *memory() {return _memory;};
 	WiFiModuleClass *wifi() {return _wifi;};

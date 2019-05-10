@@ -25,6 +25,7 @@
 	#include "scale_server.h"
 #endif // BOARD == WEB_TERMINAL2
 
+#define MULTI_POINTS_CONNECT	/* »спользовать дл€ использовани€ с несколькими точками доступа */
 #define HTML_PROGMEM          //»спользовать веб страницы из flash пам€ти
 
 #ifdef HTML_PROGMEM

@@ -8,7 +8,7 @@
 
 ScalesClass::ScalesClass(byte dout, byte pd_sck, t_scales_value * value)
 	: HX711(dout, pd_sck)
-	, Task(200),_value(value) {
+	, Task(300),_value(value) {
 	onRun(std::bind(&ScalesClass::takeWeight, this));
 	//_server = NULL;	
 	//_authenticated = false;	
@@ -45,7 +45,8 @@ void ScalesClass::takeWeight() {
 		String str = String();
 		json.printTo(str);
 		webSocket.textAll(str);
-		Serial.println(str);
+		if(!serialPause)
+			Serial.println(str);
 	}
 	updateCache();
 }

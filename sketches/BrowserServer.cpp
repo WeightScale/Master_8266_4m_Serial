@@ -263,12 +263,23 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 			return;
 		}else if (strcmp(command, "binfo") == 0) {
 			Board->battery()->doInfo(json);
-		}else if (strcmp(command, "gnet") == 0) {
+		}else
+#ifdef MULTI_POINTS_CONNECT
+		if (strcmp(command, "gpoint") == 0) {
 			String str = "";
 			json.printTo(str);
 			Serial.println(str);
 			return;
-		}else{
+		}else	
+#else
+		if (strcmp(command, "gnet") == 0) {
+			String str = "";
+			json.printTo(str);
+			Serial.println(str);
+			return;
+		}else
+#endif // MULTI_POINTS_CONNECT				
+		{
 			return;
 		}
 		size_t lengh = json.measureLength();

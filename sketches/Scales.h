@@ -31,6 +31,8 @@ private:
 	long _offset_local;
 	float _weight_zero_auto; /* вес автосброса на ноль */
 public:
+	float serialPause = false;
+public:
 	ScalesClass(byte, byte, t_scales_value * value);
 	~ScalesClass() {};
 	void begin();

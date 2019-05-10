@@ -129,29 +129,68 @@ url:
 void BoardClass::parceCmd(JsonObject& cmd) {
 	const char *command = cmd["cmd"];
 	String strCmd = "";
-	if (strcmp(command, "tp") == 0) {
+	if (strcmp(command, "tp") == 0)
+	{
 #if !defined(DEBUG_WEIGHT_RANDOM)  && !defined(DEBUG_WEIGHT_MILLIS)
-		if(Board->scales()->zero(_eeprom.scales_value.zero_man_range))
+		if (Board->scales()->zero(_eeprom.scales_value.zero_man_range))
 			SlaveScales.doTape();
 #endif	
-	}else if (strcmp(command, "sta") == 0) {
+	}
+	else if (strcmp(command, "sta") == 0)
+	{
 		_softConnect = cmd["con"];
 		_softIp = cmd["ip"].as<String>();
+		_softSSID = cmd["ssid"].as<String>();
 		if (_softConnect)
 			onSTA();
 		else
 			offSTA();
+		cmd.printTo(strCmd);
+		webSocket.textAll(strCmd);
 		return;
-	}else if (strcmp(command, "wt") == 0) {
+	}
+	else if (strcmp(command, "wt") == 0)
+	{
 		cmd.remove("cmd");
 		weightHttpCmd(cmd);
-	}else if (strcmp(command, "gnet") == 0) {
+	}
+	else 
+#ifdef MULTI_POINTS_CONNECT
+	if (strcmp(command, "gpoint") == 0)
+	{
+		cmd.printTo(strCmd);
+		webSocket.textAll(strCmd);
+		return;		
+	}
+	else if (strcmp(command, "delpoint") == 0)
+	{
+		cmd.printTo(strCmd);
+		webSocket.textAll(strCmd);
+		return;		
+	}
+	else if (strcmp(command, "point") == 0)
+	{
+		cmd.printTo(strCmd);
+		webSocket.textAll(strCmd);
+		return;		
+	}
+	else
+#else
+	if (strcmp(command, "gnet") == 0) {
 		cmd.printTo(strCmd);
 		webSocket.textAll(strCmd);
 		return;
 	}else if (strcmp(command, "snet") == 0) {
 		cmd.printTo(strCmd);
 		webSocket.textAll(strCmd);
+		return;
+	}else	
+#endif		 
+	if (strcmp(command, "pause") == 0) {
+		scales()->serialPause = true;
+		return;
+	}else if (strcmp(command, "resume") == 0) {
+		scales()->serialPause = false;
 		return;
 	}else{
 		return;
