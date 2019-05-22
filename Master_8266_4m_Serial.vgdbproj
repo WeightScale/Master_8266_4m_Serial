@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <VisualGDBProjectSettings2 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <ConfigurationName>Release</ConfigurationName>
+  <ConfigurationName>Debug</ConfigurationName>
   <Project xsi:type="com.visualgdb.project.external.arduino">
     <CustomSourceDirectories>
       <Directories />
@@ -40,6 +40,7 @@
   <Build xsi:type="com.visualgdb.build.external.arduino">
     <OutputSubdirectory>Output\$(PlatformName.defuse)\$(ConfigurationName.defuse)</OutputSubdirectory>
     <EnableVerboseBuild>false</EnableVerboseBuild>
+    <PreprocessorMacros />
   </Build>
   <CustomBuild>
     <PreSyncActions />
@@ -192,6 +193,14 @@
             </KeyValue>
             <KeyValue>
               <Key>UploadSpeed</Key>
+              <Value>921600</Value>
+            </KeyValue>
+            <KeyValue>
+              <Key>eesz</Key>
+              <Value>4M1M</Value>
+            </KeyValue>
+            <KeyValue>
+              <Key>baud</Key>
               <Value>921600</Value>
             </KeyValue>
           </Entries>
