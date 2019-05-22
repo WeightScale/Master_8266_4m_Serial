@@ -25,7 +25,8 @@
 	#include "scale_server.h"
 #endif // BOARD == WEB_TERMINAL2
 
-//#define HTML_PROGMEM          //Использовать веб страницы из flash памяти
+#define MULTI_POINTS_CONNECT	/* Использовать для использования с несколькими точками доступа */
+#define HTML_PROGMEM          //Использовать веб страницы из flash памяти
 
 #ifdef HTML_PROGMEM
 	#include "Pages.h"
@@ -57,6 +58,7 @@ typedef struct {
 	float zero_man_range;    			// 0,2,4,10,20,50,100% диапазон обнуления
 	float zero_on_range;     			// 0,2,4,10,20,50,100% диапазон обнуления
 	unsigned char zero_auto;    			// 0~4 дискрет авто обнуление
+	bool enable_zero_auto;					// использовать авто обнуление
 	char user[16];
 	char password[16];
 }t_scales_value;

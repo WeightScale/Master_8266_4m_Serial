@@ -16,9 +16,9 @@ WiFiModuleClass::WiFiModuleClass(char *host) : Task(5000) {
 	WiFi.mode(WIFI_AP);
 #endif // DEBUG_CLIENT		
 	WiFi.softAPConfig(apIP, apIP, netMsk);
-	WiFi.softAP(_hostName.c_str(), "12345678");
+	WiFi.softAP(_hostName.c_str(), "23232323");
 	_hostName.toLowerCase();
-	WiFi.hostname(_hostName);
+	//WiFi.hostname(_hostName);
 };
 
 #ifdef DEBUG_CLIENT

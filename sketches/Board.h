@@ -7,6 +7,7 @@
 #include <ArduinoJson.h>
 #include "Scales.h"
 #include "Battery.h"
+#include "SlaveScales.h"
 
 template <typename T>class MemoryClass : protected EEPROMClass {
 public:
@@ -72,7 +73,7 @@ public:
 
 class BoardClass : public TaskController {
 private:	
-	struct MyEEPROMStruct eeprom;
+	struct MyEEPROMStruct _eeprom;
 	BlinkClass *_blink;
 	WiFiModuleClass * _wifi;
 	//WiFiEventHandler stationConnected;
@@ -80,6 +81,9 @@ private:
 	MemoryClass<MyEEPROMStruct> *_memory;
 	ScalesClass *_scales;
 	BatteryClass *_battery;
+	bool _softConnect = true;				/* Флаг соединения softAP */
+	String _softIp = "";
+	String _softSSID = "";
 	//BrowserServerClass *_server;
 public :
 	BoardClass();
@@ -99,32 +103,25 @@ public :
 	};
 	void handle() {
 		run();
-		//_wifi->connect();			
-		if (Serial.available()) {
-			String str = _wifi->readSerial();
-			DynamicJsonBuffer jsonBuffer(str.length());
-			JsonObject &root = jsonBuffer.parseObject(str);
-			if (!root.success() || !root.containsKey("cmd")) {
-				Serial.flush();
-				return;
-			}				
-			parceCmd(root);
-		}	
-		delay(0);
+		//_wifi->connect();	
 	};
 	MemoryClass<MyEEPROMStruct> *memory() {return _memory;};
 	WiFiModuleClass *wifi() {return _wifi;};
 	ScalesClass *scales() {return _scales;};
 	BatteryClass *battery() {return _battery;};
 	bool doDefault();
-	void onSTA() {_blink->onRun(std::bind(&BlinkClass::blinkSTA, _blink)); };
-	void offSTA() {_blink->onRun(std::bind(&BlinkClass::blinkAP, _blink)); };
+	void onSTA() { _softConnect = true; _blink->onRun(std::bind(&BlinkClass::blinkSTA, _blink)); };
+	void offSTA() { _softConnect = false; _blink->onRun(std::bind(&BlinkClass::blinkAP, _blink)); };
 	//void onStationModeConnected(const WiFiEventStationModeConnected& evt);
 	//void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt);	
 	void parceCmd(JsonObject& cmd);
 	size_t weightCmd(JsonObject& json);
-	size_t doSettings(JsonObject& root);
+	size_t weightHttpCmd(JsonObject& json);
+	size_t doSettings(JsonObject& root);	
 	void handleBinfo(AsyncWebServerRequest *request);
+	void handleSeal(AsyncWebServerRequest * request);
+	bool saveEvent(const String& event, float value);
+	String softIp() {return _softIp;};
 };
 
 String toStringIp(IPAddress ip);

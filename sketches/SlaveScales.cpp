@@ -26,10 +26,7 @@ void SlaveScalesClass::events(AsyncWebSocket * server, AsyncWebSocketClient * cl
 	} else if(type == WS_EVT_PONG){
 	} else if(type == WS_EVT_DATA){
 		_time_connect = millis();
-		String msg = "";
-		/*for(size_t i=0; i < len; i++) {
-			msg += (char) data[i];
-		}*/
+		String msg = "";		
 		DynamicJsonBuffer jsonBuffer(len);
 		JsonObject& root = jsonBuffer.parseObject(data);		
 		if (!root.containsKey("cmd")) {
@@ -46,11 +43,14 @@ void SlaveScalesClass::events(AsyncWebSocket * server, AsyncWebSocketClient * cl
 		}else if (strcmp(command, "ip") == 0){
 			_url = root["url"].as<String>();	
 		}else if (strcmp(command, "dchg") == 0){
-			webSocket.textAll("{\"cmd\":\"dchg\",\"rec\":\"SLAVE\"}");
+			msg = "{\"cmd\":\"dchg\",\"rec\":\"SLAVE\"}";
+			webSocket.textAll(msg);
+			Serial.println(msg);
 		}else if (strcmp(command, "ovl") == 0){
-			webSocket.textAll("{\"cmd\":\"ovl\",\"rec\":\"SLAVE\"}");
-		}
-		
+			msg = "{\"cmd\":\"ovl\",\"rec\":\"SLAVE\"}";
+			webSocket.textAll(msg);
+			Serial.println(msg);
+		}		
 		
 		/*if (json.containsKey("slave"))
 		{

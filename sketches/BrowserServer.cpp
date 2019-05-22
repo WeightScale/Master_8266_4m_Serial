@@ -5,6 +5,8 @@
 #include "Board.h"
 #include <AsyncJson.h>
 #include "SettingsPage.h"
+#include "CalibratePage.h"
+#include "SoftSettingsPage.h"
 
 //using namespace std::placeholders;
 
@@ -18,9 +20,9 @@ AsyncWebSocket webSocket("/ws");
 //AsyncEventSource events("/events");
 AsyncDNSServer dnsServer;
 
-BrowserServerClass::BrowserServerClass(uint16_t port, char * username, char * password)	: AsyncWebServer(port), _username(username), _password(password) {
-	_httpAuth.wwwUsername = "sa";
-	_httpAuth.wwwPassword = "343434";
+BrowserServerClass::BrowserServerClass(uint16_t port, char * username, char * password)	: AsyncWebServer(port) {
+	_httpAuth.wwwUsername = username;
+	_httpAuth.wwwPassword = password;
 }
 
 BrowserServerClass::~BrowserServerClass(){}
@@ -41,8 +43,10 @@ void BrowserServerClass::begin() {
 	addHandler(new SPIFFSEditor(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str()));	
 	addHandler(new HttpUpdaterClass("sa", "654321"));
 	addHandler(SettingsPage);
+	addHandler(CalibratePage);
+	addHandler(SoftSettingsPage);
 	init();
-	dnsServer.start(DNS_PORT, WiFi.hostname(), apIP);
+	dnsServer.start(DNS_PORT,Board->wifi()->hostName(), apIP);
 	AsyncWebServer::begin(); // Web server start
 }
 
@@ -51,19 +55,7 @@ void BrowserServerClass::init(){
 		AsyncResponseStream *response = request->beginResponseStream(F("text/json"));
 		DynamicJsonBuffer jsonBuffer;
 		JsonObject &json = jsonBuffer.createObject();
-		JsonObject& master = json.createNestedObject("ms");
-		JsonObject& slave = json.createNestedObject("sl");
-		
-		char b[10];
-		float f = Board->scales()->weight() + SlaveScales.weight();
-		Board->scales()->formatValue(f, b);
-		json["w"] = SlaveScales.isConnected() ? String(b) : String("slave???");
-		
-		Board->scales()->doData(master);
-		Board->battery()->doData(master);
-		SlaveScales.doData(slave);
-		slave["a"] = Board->scales()->accuracy();
-		
+		Board->weightHttpCmd(json);		
 		json.printTo(*response);
 		request->send(response);			
 	});	
@@ -78,10 +70,10 @@ void BrowserServerClass::init(){
 			json.printTo(*response);
 			request->send(response);
 		});*/
-	//on("/rc", reconnectWifi);																						/* Пересоединиться по WiFi. */
-	on("/settings.json",HTTP_ANY, handleSettings);
-	//on("/rc", reconnectWifi);									/* Пересоединиться по WiFi. */
-	on("/sv", handleScaleProp);									/* Получить значения. */	
+	on("/settings.json", HTTP_ANY, std::bind(&SettingsPageClass::handleValue, SettingsPage, std::placeholders::_1));
+	on("/cdate.json", HTTP_ANY, std::bind(&CalibratePageClass::handleValue, CalibratePage, std::placeholders::_1));
+	on("/rc", reconnectWifi);									/* Пересоединиться по WiFi. */
+	on("/sv", HTTP_ANY, std::bind(&SettingsPageClass::handleProp, SettingsPage, std::placeholders::_1)); /* Получить значения. */	
 	on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
 		String str = String("Heap: ");
 		str += String(ESP.getFreeHeap());
@@ -89,8 +81,9 @@ void BrowserServerClass::init(){
 		str += String(webSocket.count());
 		request->send(200, F("text/plain"), str);
 	});
+	on("/sl", std::bind(&BoardClass::handleSeal, Board, std::placeholders::_1)); /* Опломбировать */
 	on("/rst",HTTP_ANY,[this](AsyncWebServerRequest * request){
-		if (!isAuthentified(request)){
+		if (!server->checkAdminAuth(request)){
 			return request->requestAuthentication();
 		}
 		if(Board->doDefault())
@@ -101,7 +94,8 @@ void BrowserServerClass::init(){
 	on("/rssi", handleRSSI);
 	on("/binfo.html", std::bind(&BoardClass::handleBinfo, Board, std::placeholders::_1));
 #ifdef HTML_PROGMEM
-	on("/",[](AsyncWebServerRequest * reguest){	reguest->send_P(200, F("text/html"),index_html); });								/* Главная страница. */	 
+	on("/",[](AsyncWebServerRequest * reguest){reguest->send_P(200, F("text/html"),index_html);});								/* Главная страница. */	 
+	on("/index-l.html", [](AsyncWebServerRequest * reguest){reguest->send_P(200, F("text/html"), index_l_html);});							/* Легкая страница. */
 	on("/global.css",[](AsyncWebServerRequest * reguest){	reguest->send_P(200, F("text/css"), global_css); });					/* Стили */		
 	on("/bat.png", handleBatteryPng);
 	on("/scales.png",handleScalesPng);	
@@ -155,50 +149,25 @@ bool BrowserServerClass::checkAdminAuth(AsyncWebServerRequest * r) {
 	return r->authenticate(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str());
 }
 
-bool BrowserServerClass::isAuthentified(AsyncWebServerRequest * request){
+/*bool BrowserServerClass::isAuthentified(AsyncWebServerRequest * request){
 	if (!request->authenticate(_username, _password)){
 		if (!checkAdminAuth(request)){
 			return false;
 		}
 	}
 	return true;
-}
+}*/
 
-void handleSettings(AsyncWebServerRequest * request){
-	if (!server->isAuthentified(request))
-		return request->requestAuthentication();
-	AsyncResponseStream *response = request->beginResponseStream(F("application/json"));
-	DynamicJsonBuffer jsonBuffer;
-	JsonObject &root = jsonBuffer.createObject();
-	Board->doSettings(root);	
-	root.printTo(*response);
-	request->send(response);
-}
 
-void handleFileReadAuth(AsyncWebServerRequest * request){
+
+/*void handleFileReadAuth(AsyncWebServerRequest * request){
 	if (!server->isAuthentified(request)){
 		return request->requestAuthentication();
 	}
 	request->send(SPIFFS, request->url());
-}
+}*/
 
-void handleScaleProp(AsyncWebServerRequest * request){
-	/*if (!server->isAuthentified(request))
-		return request->requestAuthentication();
-	AsyncJsonResponse * response = new AsyncJsonResponse();
-	JsonObject& root = response->getRoot();
-	root["id_local_host"] = WiFi.hostname();
-	root["id_ap_ssid"] = String(CORE->getApSSID());
-	root["id_ap_ip"] = toStringIp(WiFi.softAPIP());
-	root["id_slv_ip"] = SlaveScales.url();
-	root["id_ip"] = toStringIp(WiFi.localIP());
-	root["sl_id"] = String(Scale.seal());
-	root["chip_v"] = String(ESP.getCpuFreqMHz());
-	root["id_mac"] = WiFi.macAddress();
-	root["id_vr"] = SKETCH_VERSION;
-	response->setLength();
-	request->send(response);*/
-}
+
 
 #ifdef HTML_PROGMEM
 	void handleBatteryPng(AsyncWebServerRequest * request){
@@ -214,6 +183,16 @@ void handleScaleProp(AsyncWebServerRequest * request){
 
 void handleRSSI(AsyncWebServerRequest * request){
 	request->send(200, F("text/html"), String(WiFi.RSSI()));
+}
+
+void reconnectWifi(AsyncWebServerRequest * request) {
+	AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", "<meta http-equiv='refresh' content='10;URL=/'>RECONNECT...");
+	response->addHeader("Connection", "close");
+	request->send(response);
+	request->onDisconnect([]() {
+		SPIFFS.end();
+		ESP.reset();
+	});
 }
 
 void ICACHE_FLASH_ATTR printScanResult(int networksFound) {
@@ -273,20 +252,10 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 		JsonObject& json = jsonBuffer.createObject();
 		json["cmd"] = command;
 		if (strcmp(command, "wt") == 0){
-			JsonObject& master = json.createNestedObject("ms");
-			JsonObject& slave = json.createNestedObject("sl");
-			
-			char b[10];
-			float f = Board->scales()->weight() + SlaveScales.weight();
-			Board->scales()->formatValue(f,b);
-			json["w"] = SlaveScales.isConnected() ? String(b) : String("slave???");		
-			Board->scales()->doData(master);
-			Board->battery()->doData(master);
-			SlaveScales.doData(slave);
-			slave["a"] = Board->scales()->accuracy();
+			Board->weightHttpCmd(json);
 		}else if (strcmp(command, "tp") == 0){
 			#if !defined(DEBUG_WEIGHT_RANDOM)  && !defined(DEBUG_WEIGHT_MILLIS)
-				Board->scales()->tare();
+			if(Board->scales()->zero(Board->memory()->_value->scales_value.zero_man_range))
 				SlaveScales.doTape();
 			#endif 
 		}else if (strcmp(command, "scan") == 0) {
@@ -294,7 +263,23 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 			return;
 		}else if (strcmp(command, "binfo") == 0) {
 			Board->battery()->doInfo(json);
-		}else {
+		}else
+#ifdef MULTI_POINTS_CONNECT
+		if (strcmp(command, "gpoint") == 0) {
+			String str = "";
+			json.printTo(str);
+			Serial.println(str);
+			return;
+		}else	
+#else
+		if (strcmp(command, "gnet") == 0) {
+			String str = "";
+			json.printTo(str);
+			Serial.println(str);
+			return;
+		}else
+#endif // MULTI_POINTS_CONNECT				
+		{
 			return;
 		}
 		size_t lengh = json.measureLength();

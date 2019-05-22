@@ -8,7 +8,7 @@
 
 ScalesClass::ScalesClass(byte dout, byte pd_sck, t_scales_value * value)
 	: HX711(dout, pd_sck)
-	, Task(200),_value(value) {
+	, Task(300),_value(value) {
 	onRun(std::bind(&ScalesClass::takeWeight, this));
 	//_server = NULL;	
 	//_authenticated = false;	
@@ -22,40 +22,39 @@ void ScalesClass::begin() {
 	if (_value->scale != _value->scale) {
 		_value->scale = 0.0f;	
 	}
+	_offset_local = _value->offset;
 	digitalWrite(RATE_PIN,_value->rate);
 	//_downloadValue();
 	mathRound();
 #if !defined(DEBUG_WEIGHT_RANDOM)  && !defined(DEBUG_WEIGHT_MILLIS)
 	readAverage();
-	tare();			  
+	//zero(_value->zero_on_range);		  
 #endif // !DEBUG_WEIGHT_RANDOM && DEBUG_WEIGHT_MILLIS
 	SetFilterWeight(_value->filter);
 }
 
 void ScalesClass::takeWeight() {
-	fetchWeight();
-	DynamicJsonBuffer jsonBuffer;
-	JsonObject &json = jsonBuffer.createObject();	
-	size_t lengh = Board->weightCmd(json);	
-	//AsyncWebSocketMessageBuffer * buffer = webSocket.makeBuffer(lengh);
-	//if (buffer) {
-		String str = String();
-	//json.printTo((char *)buffer->get(), lengh + 1);
-	json.printTo(str);
-	webSocket.textAll(str);
-	Serial.println(str);
-		//webSocket.textAll(buffer);
-	//}
+	fetchWeight();	
 	if (_saveWeight.isSave) {
-		//CORE->saveEvent("weight", _saveWeight.value);
+		Board->saveEvent("weight", _saveWeight.value);
 		_saveWeight.isSave = false;
+	}else{
+		DynamicJsonBuffer jsonBuffer;
+		JsonObject &json = jsonBuffer.createObject();	
+		size_t lengh = Board->weightCmd(json);
+		String str = String();
+		json.printTo(str);
+		webSocket.textAll(str);
+		if(!serialPause)
+			Serial.println(str);
 	}
 	updateCache();
 }
 
 void ScalesClass::fetchWeight() {
 	_weight = getWeight();
-	detectStable(_weight + SlaveScales.weight());	
+	detectStable(_weight + SlaveScales.weight());
+	detectAutoZero();
 }
 
 long ScalesClass::readAverage() {
@@ -79,7 +78,7 @@ long ScalesClass::readAverage() {
 
 long ScalesClass::getValue() {
 	int i = readAverage();
-	return i - _value->offset;
+	return i - _offset_local;
 }
 
 float ScalesClass::getUnits() {
@@ -98,7 +97,16 @@ float ScalesClass::getWeight() {
 	return round(getUnits() * _round) / _round; 
 }
 
-void ScalesClass::detectStable(float w) {	
+bool ScalesClass::zero(float range) {
+	//_weight = getWeight();
+	if(fabs(_saveWeight.value) > (_value->max * range)) //если текущий вес больше диапазона нуля тогда не сбрасываем
+		return false;
+	SetCurrent(read());
+	offset(Current());
+	return true;
+}
+
+void ICACHE_RAM_ATTR ScalesClass::detectStable(float w) {	
 	if (_saveWeight.value != w) {
 		_saveWeight.stabNum = STABLE_NUM_MAX;
 		_stableWeight = false;
@@ -116,10 +124,28 @@ void ScalesClass::detectStable(float w) {
 	_stableWeight = true;
 	if (millis() < _saveWeight.time)
 		return;
-	if (fabs(_saveWeight.value) > _stable_step) {
+	if (fabs(_saveWeight.value) > _weight_zero_auto) {
 		_saveWeight.isSave = true;
 		_saveWeight.time = millis() + 10000;
 	}
+}
+
+void ScalesClass::detectAutoZero() {
+	static unsigned long time;
+	static bool flag;
+	if (!_value->enable_zero_auto)
+		return;
+	if (fabs(_saveWeight.value) > _weight_zero_auto)
+		return;
+	if (!flag) {
+		flag = true;
+		time = millis() + 60000;
+	}
+	if (time > millis())
+		return;
+	if (zero(_value->zero_man_range))
+		SlaveScales.doTape();
+	flag = false;	
 }
 
 size_t ScalesClass::doData(JsonObject& json) {
