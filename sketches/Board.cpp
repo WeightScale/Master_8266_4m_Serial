@@ -6,7 +6,7 @@
 #include "SlaveScales.h"
 #include "BrowserServer.h"
 
-CalibratePageClass * CalibratePage;
+
 BrowserServerClass * server;
 
 BoardClass::BoardClass() {
@@ -198,6 +198,19 @@ void BoardClass::parceCmd(JsonObject& cmd) {
 	cmd.printTo(strCmd);
 	Serial.println(strCmd);
 };
+
+String BoardClass::readSerial(uint32_t timeout) {	
+	String tempData = "";
+	uint64_t timeOld = millis();
+	while (Serial.available() || (millis() < (timeOld + timeout))) {
+		if (Serial.available()) {	
+			tempData += (char) Serial.read();
+			timeOld = millis();
+		}
+		yield();
+	}
+	return tempData;
+}
 
 void BoardClass::handleSeal(AsyncWebServerRequest * request) {
 	randomSeed(_scales->readAverage());

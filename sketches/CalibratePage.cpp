@@ -2,7 +2,7 @@
 #include "Board.h"
 #include "BrowserServer.h"
 
-//CalibratePageClass * CalibratePage;
+CalibratePageClass * CalibratePage;
 
 CalibratePageClass::CalibratePageClass(t_scales_value * value)	: _value(value) {};
 

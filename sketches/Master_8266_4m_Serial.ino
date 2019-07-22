@@ -33,7 +33,7 @@ void loop(){
 #endif // DEBUG_CLIENT
 	Board->handle();
 	if (Serial.available()) {
-		String str = Board->wifi()->readSerial();
+		String str = Board->readSerial();
 		DynamicJsonBuffer jsonBuffer(str.length());
 		JsonObject &root = jsonBuffer.parseObject(str);
 		if (!root.success() || !root.containsKey("cmd")) {

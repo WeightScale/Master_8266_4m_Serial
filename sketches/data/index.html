@@ -213,6 +213,9 @@
                     case 'tp':
                         d.getElementById('b_id').disabled = false;
                         break;
+                    case 'error':
+                        alert("Ошибка соединения :" + e.ssid+" статус : "+e.status);
+                        break;
                     case 'dchg':
                         alert("Батарея разряжена!!! Поменяйте батарею.", function() {
                             d.getElementById('id_alr').style.display = 'none';

@@ -54,18 +54,6 @@ class CaptiveRequestHandler : public AsyncWebHandler {
 	}
 };
 
-
-class TapeRequestHandler : public AsyncWebHandler {
-	public:
-	TapeRequestHandler() {}
-	virtual ~TapeRequestHandler() {}
-	
-	virtual bool canHandle(AsyncWebServerRequest *request) override final;
-	void handleRequest(AsyncWebServerRequest *request) override final {
-		request->send(204, "text/html", "");
-	}
-};
-
 extern AsyncDNSServer dnsServer;
 extern BrowserServerClass  *server;
 extern AsyncWebSocket webSocket;
@@ -74,9 +62,7 @@ extern AsyncWebSocket webSocket;
 	void handleBatteryPng(AsyncWebServerRequest*);
 	void handleScalesPng(AsyncWebServerRequest*);
 #endif
-//size_t commandWeight(JsonObject& json);
 
-//void handleAccessPoint(AsyncWebServerRequest*);
 void handleRSSI(AsyncWebServerRequest*);
 void reconnectWifi(AsyncWebServerRequest * request);
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);

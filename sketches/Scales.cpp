@@ -6,12 +6,8 @@
 //ScalesClass scales(DOUT_PIN, SCK_PIN);
 //ScalesClass<T> * scales;
 
-ScalesClass::ScalesClass(byte dout, byte pd_sck, t_scales_value * value)
-	: HX711(dout, pd_sck)
-	, Task(300),_value(value) {
+ScalesClass::ScalesClass(byte dout, byte pd_sck, t_scales_value * value) : HX711(dout, pd_sck) , Task(300),_value(value) {
 	onRun(std::bind(&ScalesClass::takeWeight, this));
-	//_server = NULL;	
-	//_authenticated = false;	
 	_saveWeight.isSave = false;
 	_saveWeight.value = 0.0;
 }
@@ -24,7 +20,6 @@ void ScalesClass::begin() {
 	}
 	_offset_local = _value->offset;
 	digitalWrite(RATE_PIN,_value->rate);
-	//_downloadValue();
 	mathRound();
 #if !defined(DEBUG_WEIGHT_RANDOM)  && !defined(DEBUG_WEIGHT_MILLIS)
 	readAverage();
@@ -98,7 +93,6 @@ float ScalesClass::getWeight() {
 }
 
 bool ScalesClass::zero(float range) {
-	//_weight = getWeight();
 	if(fabs(_saveWeight.value) > (_value->max * range)) //если текущий вес больше диапазона нуля тогда не сбрасываем
 		return false;
 	SetCurrent(read());

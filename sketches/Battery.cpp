@@ -1,7 +1,6 @@
 #include "Battery.h"
 
-BatteryClass::BatteryClass(unsigned int *min, unsigned int *max)
-	: Task(20000) {
+BatteryClass::BatteryClass(unsigned int *min, unsigned int *max) : Task(20000) {
 	/* 20 Обновляем заряд батареи */
 	onRun(std::bind(&BatteryClass::fetchCharge, this));
 	_max = max;
@@ -14,14 +13,9 @@ BatteryClass::BatteryClass(unsigned int *min, unsigned int *max)
 
 unsigned int BatteryClass::fetchCharge() {
 	_charge = _get_adc(1);
-	//_charge = Constrain(_charge, this->_min, this->_max);
 	_charge = constrain(_charge, *_min, *_max);
 	_charge = map(_charge, *_min, *_max, 0, 100);
-	//_charge = Map(_charge, _min, _max, 0, 100);
 	_isDischarged = _charge <= 5;
-	/*if (_isDischarged) {
-		ws.textAll("{\"cmd\":\"dchg\"}");
-	}*/
 	return _charge;
 }
 
@@ -50,4 +44,3 @@ size_t BatteryClass::doData(JsonObject& json) {
 	json["c"] = _charge;
 	return json.measureLength();
 };
-

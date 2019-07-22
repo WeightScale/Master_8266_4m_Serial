@@ -36,9 +36,6 @@ void BrowserServerClass::begin() {
 	webSocket.onEvent(onWsEvent);
 	addHandler(&webSocket);
 	addHandler(&SlaveScales);
-	//addHandler(new TapeRequestHandler());
-	//CORE = new CoreClass(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str());	
-	//addHandler(CORE);
 	addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
 	addHandler(new SPIFFSEditor(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str()));	
 	addHandler(new HttpUpdaterClass("sa", "654321"));
@@ -46,7 +43,7 @@ void BrowserServerClass::begin() {
 	addHandler(CalibratePage);
 	addHandler(SoftSettingsPage);
 	init();
-	dnsServer.start(DNS_PORT,Board->wifi()->hostName(), apIP);
+	dnsServer.start(DNS_PORT,"*", apIP);
 	AsyncWebServer::begin(); // Web server start
 }
 
@@ -133,16 +130,6 @@ void BrowserServerClass::init(){
 	onNotFound([](AsyncWebServerRequest *request){
 		request->send(404);
 	});
-}
-
-bool TapeRequestHandler::canHandle(AsyncWebServerRequest *request){
-	if (request->host().equalsIgnoreCase("/tp")){
-		/*if (SlaveScales.doTape()){
-			Scale.tare();
-			return true;
-		}*/
-	}
-	return false;
 }
 
 bool BrowserServerClass::checkAdminAuth(AsyncWebServerRequest * r) {	

@@ -50,28 +50,7 @@ void SlaveScalesClass::events(AsyncWebSocket * server, AsyncWebSocketClient * cl
 			msg = "{\"cmd\":\"ovl\",\"rec\":\"SLAVE\"}";
 			webSocket.textAll(msg);
 			Serial.println(msg);
-		}		
-		
-		/*if (json.containsKey("slave"))
-		{
-			JsonObject& slave = json["slave"]; 
-			_weight = slave["w"].as<float>();
-			_accuracy = slave["a"].as<int>();
-			_charge = slave["c"];
-			_stableNum = slave["s"].as<int>();
-		}
-		else if (json.containsKey("ip"))
-		{
-			_url = json["ip"].as<String>();
-		}
-		else if (json.containsKey("dchg"))
-		{
-			ws.textAll("{\"cmd\":\"dchg\"}");
-		}
-		else if (json.containsKey("ovl"))
-		{
-			ws.textAll("{\"cmd\":\"dchg\"}");
-		}*/
+		}	
 	}
 }
 

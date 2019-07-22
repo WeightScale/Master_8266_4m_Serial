@@ -9,7 +9,7 @@ WiFiModuleClass::WiFiModuleClass(char *host) : Task(5000) {
 	WiFi.persistent(false);
 	WiFi.setAutoConnect(false);
 	WiFi.setAutoReconnect(false);
-	
+	WiFi.setPhyMode(WIFI_PHY_MODE_11B);
 #ifdef DEBUG_CLIENT
 	WiFi.mode(WIFI_AP_STA);
 #else
@@ -41,15 +41,3 @@ WiFiModuleClass::WiFiModuleClass(char *host) : Task(5000) {
 };			  
 #endif // DEBUG_CLIENT
 
-String /*ICACHE_RAM_ATTR*/ WiFiModuleClass::readSerial(uint32_t timeout) {	
-	String tempData = "";
-	uint64_t timeOld = millis();
-	while (Serial.available() || (millis() < (timeOld + timeout))) {
-		if (Serial.available()) {	
-			tempData += (char) Serial.read();
-			timeOld = millis();
-		}
-		yield();
-	}
-	return tempData;
-}

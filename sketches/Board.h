@@ -103,7 +103,6 @@ public :
 	};
 	void handle() {
 		run();
-		//_wifi->connect();	
 	};
 	MemoryClass<MyEEPROMStruct> *memory() {return _memory;};
 	WiFiModuleClass *wifi() {return _wifi;};
@@ -115,6 +114,7 @@ public :
 	//void onStationModeConnected(const WiFiEventStationModeConnected& evt);
 	//void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt);	
 	void parceCmd(JsonObject& cmd);
+	String readSerial(uint32_t timeou = 5);
 	size_t weightCmd(JsonObject& json);
 	size_t weightHttpCmd(JsonObject& json);
 	size_t doSettings(JsonObject& root);	
