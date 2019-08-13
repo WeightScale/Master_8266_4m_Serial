@@ -94,8 +94,6 @@ size_t BoardClass::doSettings(JsonObject& root) {
 	return root.measureLength();
 };
 
-
-
 void BoardClass::handleBinfo(AsyncWebServerRequest *request) {
 	if (!request->authenticate(_eeprom.scales_value.user, _eeprom.scales_value.password))
 		if (!server->checkAdminAuth(request)) {
@@ -141,6 +139,7 @@ void BoardClass::parceCmd(JsonObject& cmd) {
 		_softConnect = cmd["con"];
 		_softIp = cmd["ip"].as<String>();
 		_softSSID = cmd["ssid"].as<String>();
+		_softHost = cmd["host"].as<String>();
 		if (_softConnect)
 			onSTA();
 		else

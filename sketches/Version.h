@@ -1,7 +1,7 @@
 #pragma once
 
-#define SKETCH_VERSION "master_07s_serial.002"
-#define SPIFFS_VERSION "master_07s_serial.002"
+#define SKETCH_VERSION "master_07s_serial.003"
+#define SPIFFS_VERSION "master_07s_serial.003"
 
 /*
 Формат файла

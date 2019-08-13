@@ -6,7 +6,7 @@
 //ScalesClass scales(DOUT_PIN, SCK_PIN);
 //ScalesClass<T> * scales;
 
-ScalesClass::ScalesClass(byte dout, byte pd_sck, t_scales_value * value) : HX711(dout, pd_sck) , Task(300),_value(value) {
+ScalesClass::ScalesClass(byte dout, byte pd_sck, t_scales_value * value) : HX711(dout, pd_sck) , Task(300), _value(value) {
 	onRun(std::bind(&ScalesClass::takeWeight, this));
 	_saveWeight.isSave = false;
 	_saveWeight.value = 0.0;

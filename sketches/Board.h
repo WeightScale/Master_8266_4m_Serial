@@ -84,6 +84,7 @@ private:
 	bool _softConnect = true;				/* Флаг соединения softAP */
 	String _softIp = "";
 	String _softSSID = "";
+	String _softHost = "";
 	//BrowserServerClass *_server;
 public :
 	BoardClass();
@@ -122,6 +123,7 @@ public :
 	void handleSeal(AsyncWebServerRequest * request);
 	bool saveEvent(const String& event, float value);
 	String softIp() {return _softIp;};
+	String softHost() {return _softHost;};
 };
 
 String toStringIp(IPAddress ip);

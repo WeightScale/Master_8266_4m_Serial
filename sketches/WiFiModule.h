@@ -2,6 +2,8 @@
 #include "Task.h"
 #include <ESP8266WiFi.h>
 
+#define KEY_AP "23232323"
+
 //#define DEBUG_CLIENT
 
 class WiFiModuleClass : public Task {

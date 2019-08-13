@@ -79,6 +79,7 @@ void SettingsPageClass::handleProp(AsyncWebServerRequest * request) {
 	root["id_ap_ip"] = toStringIp(WiFi.softAPIP());
 	root["id_slv_ip"] = SlaveScales.url();
 	root["id_ip"] = Board->softIp();
+	root["id_soft_host"] = Board->softHost();
 	root["sl_id"] = String(Board->scales()->seal());
 	root["chip_v"] = String(ESP.getCpuFreqMHz());
 	root["id_mac"] = WiFi.macAddress();

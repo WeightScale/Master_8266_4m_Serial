@@ -46,21 +46,21 @@ typedef struct {
 } settings_t;
 
 typedef struct {
-	bool rate;								/*время измерения 80Гц*/
+	bool rate;								/* время измерения 80Гц */
 	long offset;							/* ноль поатформы */
 	unsigned char average;					/* кличество измерений АЦП */
 	unsigned char step;						/* шаг измерения */
 	unsigned char accuracy;					/* количество знаков после запятой */
 	float max;								/* предел взвешивния */
-	float scale;							/*калибровочный коэфциент*/
-	unsigned char filter;					/*значение фильтра*/
-	unsigned int seal;						/*номер пломбы*/
+	float scale;							/* калибровочный коэфциент */
+	unsigned char filter;					/* значение фильтра */
+	unsigned int seal;						/* номер пломбы */
 	float zero_man_range;    				// 0,2,4,10,20,50,100% диапазон обнуления
 	float zero_on_range;     				// 0,2,4,10,20,50,100% диапазон обнуления
 	unsigned char zero_auto;    			// 0~4 дискрет авто обнуление
 	bool enable_zero_auto;					// использовать авто обнуление
-	char user[16];							/*имя пользователя*/
-	char password[16];						/*пароль*/
+	char user[16];							/* имя пользователя */
+	char password[16];						/* пароль */
 }t_scales_value;
 
 struct MyEEPROMStruct {
